@@ -1,5 +1,5 @@
 # ECAR_scripts
-Code required to analyze yeast ExtraCellular Acidification data 
+Code required to analyze transcriptomic data associated with the _Saturnispora_ ExtraCellular Acidification comparative analysis 
 
 RNA_trim_to_count.yml - A yaml file providing the details to set up a conda environment for these analyses.
 
