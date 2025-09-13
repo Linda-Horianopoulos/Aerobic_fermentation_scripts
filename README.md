@@ -5,6 +5,6 @@ RNA_trim_to_count.yml - A yaml file providing the details to set up a conda envi
 
 Orthogroups.tsv - A tab separated file listing the reanalyzed Orthogroups using _Saturnispora_ translated gene sequences only giving the gene names for each Orthogroup. This file is needed to sum the counts of transcripts across orthogroups and facilitate comparisons of expression of orthogroups.
 
-RNA_trimtocounts.sh - A bash file with the pipeline for analyzing the raw RNA seq data to gnerate counts for each gene.
+RNA_trimtocounts.sh - A bash file with the pipeline for analyzing the raw RNA seq data to generate counts for each gene.
 
 sum_counts_OGv2.py - A python script to sum the counts of genes within the same orthogroup.
