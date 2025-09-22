@@ -1,4 +1,4 @@
-# ECAR_scripts
+# Aerobic_fermentation_scripts
 Code required to analyze transcriptomic data associated with the _Saturnispora_ aerobic fermentation comparative analysis 
 
 RNA_trim_to_count.yml - A yaml file providing the details to set up a conda environment for these analyses.
