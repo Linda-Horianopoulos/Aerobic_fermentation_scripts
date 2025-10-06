@@ -5,6 +5,9 @@ from datetime import datetime
 token = os.getenv("GITHUB_TOKEN")
 repo = os.getenv("GITHUB_REPOSITORY")
 
+print("Using repo:", repo)
+print("Token present:", bool(token))
+
 headers = {"Authorization": f"token {token}"}
 base_url = f"https://api.github.com/repos/{repo}/traffic"
 
@@ -27,3 +30,4 @@ if not os.path.exists(csv_file):
 
 with open(csv_file, "a") as f:
     f.write(line)
+
