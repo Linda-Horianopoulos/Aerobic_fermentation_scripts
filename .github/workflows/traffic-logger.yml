@@ -2,8 +2,8 @@ name: GitHub Traffic log as CSV
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # Daily at midnight UTC
-  workflow_dispatch:
+    - cron: '0 0 * * *'  # Runs daily at midnight UTC
+  workflow_dispatch:     # Allows manual triggering
 
 jobs:
   log-traffic:
@@ -21,49 +21,55 @@ jobs:
       - name: Install requests library
         run: pip install requests
 
-      - name: Log GitHub traffic to CSV
+      - name: Write and run Python script to fetch traffic
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
         run: |
-          import os
-          import requests
-          import csv
-          from datetime import datetime
+          echo 'import os
+import requests
+import csv
+from datetime import datetime
 
-          token = os.environ['GITHUB_TOKEN']
-          repo = os.environ['REPO']
-          headers = {'Authorization': f'token {token}', 'Accept': 'application/vnd.github+json'}
+token = os.environ["GITHUB_TOKEN"]
+repo = os.environ["REPO"]
+headers = {
+    "Authorization": f"token {token}",
+    "Accept": "application/vnd.github+json"
+}
 
-          def fetch(endpoint):
-              url = f'https://api.github.com/repos/{repo}/traffic/{endpoint}'
-              r = requests.get(url, headers=headers)
-              r.raise_for_status()
-              return r.json()
+def fetch(endpoint):
+    url = f"https://api.github.com/repos/{repo}/traffic/{endpoint}"
+    r = requests.get(url, headers=headers)
+    r.raise_for_status()
+    return r.json()
 
-          views = fetch("views")
-          clones = fetch("clones")
+views = fetch("views")
+clones = fetch("clones")
 
-          timestamp = datetime.utcnow().isoformat()
+timestamp = datetime.utcnow().isoformat()
 
-          row = [
-              timestamp,
-              views["count"],
-              views["uniques"],
-              clones["count"],
-              clones["uniques"]
-          ]
+row = [
+    timestamp,
+    views["count"],
+    views["uniques"],
+    clones["count"],
+    clones["uniques"]
+]
 
-          csv_file = "traffic_log.csv"
-          file_exists = os.path.isfile(csv_file)
+csv_file = "traffic_log.csv"
+file_exists = os.path.isfile(csv_file)
 
-          with open(csv_file, "a", newline="") as f:
-              writer = csv.writer(f)
-              if not file_exists:
-                  writer.writerow(["timestamp", "views", "unique_views", "clones", "unique_clones"])
-              writer.writerow(row)
+with open(csv_file, "a", newline="") as f:
+    writer = csv.writer(f)
+    if not file_exists:
+        writer.writerow(["timestamp", "views", "unique_views", "clones", "unique_clones"])
+    writer.writerow(row)
+' > traffic_logger.py
 
-      - name: Commit and push CSV
+          python traffic_logger.py
+
+      - name: Commit and push traffic log
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
