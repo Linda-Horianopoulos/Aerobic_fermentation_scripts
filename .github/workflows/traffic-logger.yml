@@ -2,8 +2,8 @@ name: GitHub Traffic log as CSV
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # Runs daily at midnight UTC
-  workflow_dispatch:     # Allows manual trigger
+    - cron: '0 0 * * *'  # Daily at midnight UTC
+  workflow_dispatch:
 
 jobs:
   log-traffic:
@@ -18,15 +18,15 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install requests library
+      - name: Install dependencies
         run: pip install requests
 
-      - name: Write and run Python script
+      - name: Write and run traffic logging script
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
         run: |
-          cat << 'EOF' > traffic_logger.py
+          cat > traffic_logger.py << 'EOF'
 import os
 import requests
 import csv
@@ -75,6 +75,5 @@ EOF
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
           git add traffic_log.csv
-          git commit -m "Update traffic log CSV [skip ci]" || echo "No changes"
+          git commit -m "Update traffic log CSV [skip ci]" || echo "No changes to commit"
           git push
-
