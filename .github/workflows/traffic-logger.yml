@@ -1,0 +1,72 @@
+name: GitHub Traffic log as CSV
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Daily at midnight UTC
+  workflow_dispatch:
+
+jobs:
+  log-traffic:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install requests library
+        run: pip install requests
+
+      - name: Log GitHub traffic to CSV
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          import os
+          import requests
+          import csv
+          from datetime import datetime
+
+          token = os.environ['GITHUB_TOKEN']
+          repo = os.environ['REPO']
+          headers = {'Authorization': f'token {token}', 'Accept': 'application/vnd.github+json'}
+
+          def fetch(endpoint):
+              url = f'https://api.github.com/repos/{repo}/traffic/{endpoint}'
+              r = requests.get(url, headers=headers)
+              r.raise_for_status()
+              return r.json()
+
+          views = fetch("views")
+          clones = fetch("clones")
+
+          timestamp = datetime.utcnow().isoformat()
+
+          row = [
+              timestamp,
+              views["count"],
+              views["uniques"],
+              clones["count"],
+              clones["uniques"]
+          ]
+
+          csv_file = "traffic_log.csv"
+          file_exists = os.path.isfile(csv_file)
+
+          with open(csv_file, "a", newline="") as f:
+              writer = csv.writer(f)
+              if not file_exists:
+                  writer.writerow(["timestamp", "views", "unique_views", "clones", "unique_clones"])
+              writer.writerow(row)
+
+      - name: Commit and push CSV
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add traffic_log.csv
+          git commit -m "Update traffic log CSV [skip ci]" || echo "No changes"
+          git push
